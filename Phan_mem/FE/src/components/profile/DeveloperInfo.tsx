@@ -23,17 +23,24 @@ interface DeveloperInfoProps {
 }
 
 export default function DeveloperInfo({ socialLinks }: DeveloperInfoProps) {
+  const githubUrl =
+    socialLinks?.github && !socialLinks.github.includes('usera') && socialLinks.github !== 'https://github.com'
+      ? socialLinks.github
+      : 'https://github.com/Snoopyz1/BTL_IOT';
+
   const postmanUrl =
-    socialLinks.postman ||
-    'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de';
-  const pdfUrl = socialLinks.pdfDocument || '/SmartHome_API_Docs.pdf';
-  const pdfName = socialLinks.pdfFileName || 'SmartHome_API_Docs.pdf';
+    socialLinks?.postman && !socialLinks.postman.includes('smarthome-iot-api')
+      ? socialLinks.postman
+      : 'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de';
+
+  const pdfUrl = socialLinks?.pdfDocument || '/SmartHome_API_Docs.pdf';
+  const pdfName = socialLinks?.pdfFileName || 'SmartHome_API_Docs.pdf';
 
   const items = [
     {
       key: 'github',
       label: 'GitHub Repository',
-      url: socialLinks.github || 'https://github.com/Snoopyz1/BTL_IOT',
+      url: githubUrl,
       icon: GithubIcon,
       bgColor: 'bg-gray-900 text-white',
       borderColor: 'border-surface-200/80 hover:border-gray-400',

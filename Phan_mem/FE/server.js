@@ -25,7 +25,7 @@ let mockUser = {
   createdAt: '2026-01-01T00:00:00+07:00',
   updatedAt: '2026-08-19T07:00:00+07:00',
   socialLinks: {
-    github: 'https://github.com/usera',
+    github: 'https://github.com/Snoopyz1/BTL_IOT',
     figma: 'https://figma.com/@usera',
     linkedin: 'https://linkedin.com/in/usera',
   },
@@ -253,7 +253,7 @@ router.post('/auth/register', (req, res) => {
     role: 'User',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    socialLinks: { github: 'https://github.com' },
+    socialLinks: { github: 'https://github.com/Snoopyz1/BTL_IOT' },
   };
 
   res.json({

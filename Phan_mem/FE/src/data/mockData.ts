@@ -116,7 +116,7 @@ export const mockUser: User = {
   createdAt: '2026-01-01T00:00:00+07:00',
   updatedAt: '2026-08-19T07:00:00+07:00',
   socialLinks: {
-    github: 'https://github.com',
+    github: 'https://github.com/Snoopyz1/BTL_IOT',
     figma: 'https://figma.com',
     postman: 'https://documenter.getpostman.com/view/smarthome-iot-api',
     pdfDocument: '/SmartHome_API_Docs.pdf',

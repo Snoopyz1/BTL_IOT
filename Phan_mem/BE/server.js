@@ -205,7 +205,7 @@ async function initializeDatabase(pool) {
         'Hà Nội, Việt Nam',
         'Administrator',
         JSON.stringify({
-          github: 'https://github.com/usera',
+          github: 'https://github.com/Snoopyz1/BTL_IOT',
           figma: 'https://figma.com/@usera',
         }),
       ]

@@ -23,6 +23,7 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
     phone: user.phone,
     dateOfBirth: user.dateOfBirth,
     address: user.address,
+    github: user.socialLinks?.github || 'https://github.com/Snoopyz1/BTL_IOT',
   });
 
   const handleEdit = () => {
@@ -32,6 +33,7 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
       phone: user.phone,
       dateOfBirth: user.dateOfBirth,
       address: user.address,
+      github: user.socialLinks?.github || 'https://github.com/Snoopyz1/BTL_IOT',
     });
     setEditing(true);
   };
@@ -43,7 +45,17 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const payload: UserUpdatePayload = { ...form };
+      const payload: UserUpdatePayload = {
+        fullName: form.fullName,
+        email: form.email,
+        phone: form.phone,
+        dateOfBirth: form.dateOfBirth,
+        address: form.address,
+        socialLinks: {
+          ...user.socialLinks,
+          github: form.github,
+        },
+      };
       const updated = await updateProfile(payload);
       updateUser(updated);
       onUpdate(updated);
@@ -65,6 +77,7 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
     { key: 'phone', label: 'Số điện thoại', type: 'text' },
     { key: 'dateOfBirth', label: 'Ngày sinh', type: 'date' },
     { key: 'address', label: 'Địa chỉ', type: 'text' },
+    { key: 'github', label: 'GitHub Repository', type: 'url' },
   ] as const;
 
   return (
@@ -108,15 +121,26 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
             {editing ? (
               <input
                 type={field.type}
-                value={form[field.key]}
+                value={form[field.key as keyof typeof form] || ''}
                 onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
                 className={inputClass}
               />
             ) : (
               <div className={readonlyClass}>
                 {field.key === 'dateOfBirth'
-                  ? new Date(user[field.key]).toLocaleDateString('vi-VN')
-                  : user[field.key]}
+                  ? (user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString('vi-VN') : '—')
+                  : field.key === 'github'
+                  ? (
+                    <a
+                      href={form.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary-600 hover:underline truncate"
+                    >
+                      {form.github}
+                    </a>
+                  )
+                  : (user[field.key as keyof User] as string || '—')}
               </div>
             )}
           </div>

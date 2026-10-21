@@ -28,6 +28,7 @@ let mockUser = {
     github: 'https://github.com/Snoopyz1/BTL_IOT',
     figma: 'https://figma.com/@usera',
     linkedin: 'https://linkedin.com/in/usera',
+    postman: 'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de',
   },
 };
 
@@ -253,7 +254,10 @@ router.post('/auth/register', (req, res) => {
     role: 'User',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    socialLinks: { github: 'https://github.com/Snoopyz1/BTL_IOT' },
+    socialLinks: {
+      github: 'https://github.com/Snoopyz1/BTL_IOT',
+      postman: 'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de',
+    },
   };
 
   res.json({

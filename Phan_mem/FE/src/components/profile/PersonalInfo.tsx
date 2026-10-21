@@ -24,6 +24,9 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
     dateOfBirth: user.dateOfBirth,
     address: user.address,
     github: user.socialLinks?.github || 'https://github.com/Snoopyz1/BTL_IOT',
+    postman:
+      user.socialLinks?.postman ||
+      'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de',
   });
 
   const handleEdit = () => {
@@ -34,6 +37,9 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
       dateOfBirth: user.dateOfBirth,
       address: user.address,
       github: user.socialLinks?.github || 'https://github.com/Snoopyz1/BTL_IOT',
+      postman:
+        user.socialLinks?.postman ||
+        'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de',
     });
     setEditing(true);
   };
@@ -54,6 +60,7 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
         socialLinks: {
           ...user.socialLinks,
           github: form.github,
+          postman: form.postman,
         },
       };
       const updated = await updateProfile(payload);
@@ -78,6 +85,7 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
     { key: 'dateOfBirth', label: 'Ngày sinh', type: 'date' },
     { key: 'address', label: 'Địa chỉ', type: 'text' },
     { key: 'github', label: 'GitHub Repository', type: 'url' },
+    { key: 'postman', label: 'Postman Documentation', type: 'url' },
   ] as const;
 
   return (
@@ -138,6 +146,17 @@ export default function PersonalInfo({ user, onUpdate }: PersonalInfoProps) {
                       className="text-primary-600 hover:underline truncate"
                     >
                       {form.github}
+                    </a>
+                  )
+                  : field.key === 'postman'
+                  ? (
+                    <a
+                      href={form.postman}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-orange-600 hover:underline truncate"
+                    >
+                      {form.postman}
                     </a>
                   )
                   : (user[field.key as keyof User] as string || '—')}

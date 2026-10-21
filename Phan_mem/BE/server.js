@@ -207,6 +207,7 @@ async function initializeDatabase(pool) {
         JSON.stringify({
           github: 'https://github.com/Snoopyz1/BTL_IOT',
           figma: 'https://figma.com/@usera',
+          postman: 'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de',
         }),
       ]
     );

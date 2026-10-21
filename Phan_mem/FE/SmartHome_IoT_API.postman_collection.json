@@ -1,0 +1,335 @@
+{
+	"info": {
+		"_postman_id": "smarthome-iot-api-v1",
+		"name": "SmartHome IOT API",
+		"description": "Tập hợp tất cả 12 API cho hệ thống quản lý SmartHome IoT Dashboard",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "0. AUTH API",
+			"item": [
+				{
+					"name": "/api/auth/login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"usernameOrEmail\": \"user123\",\n  \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5500/api/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						}
+					}
+				},
+				{
+					"name": "/api/auth/register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Hoàng Trần\",\n  \"username\": \"hoang\",\n  \"email\": \"hoang.tran@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"phone\": \"+84 912 345 678\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5500/api/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"auth",
+								"register"
+							]
+						}
+					}
+				},
+				{
+					"name": "/api/auth/me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer mock_jwt_token_U001"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5500/api/auth/me",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"auth",
+								"me"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "1. SENSORS API",
+			"item": [
+				{
+					"name": "/api/sensors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5500/api/sensors",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"sensors"
+							]
+						}
+					}
+				},
+				{
+					"name": "/api/sensors/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5500/api/sensors/S001",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"sensors",
+								"S001"
+							]
+						}
+					}
+				},
+				{
+					"name": "/api/sensor-data",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5500/api/sensor-data?sensorId=S001&page=1&limit=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"sensor-data"
+							],
+							"query": [
+								{
+									"key": "sensorId",
+									"value": "S001"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. DEVICES API",
+			"item": [
+				{
+					"name": "/api/devices",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5500/api/devices",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"devices"
+							]
+						}
+					}
+				},
+				{
+					"name": "/api/devices/:id",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5500/api/devices/D001",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"devices",
+								"D001"
+							]
+						}
+					}
+				},
+				{
+					"name": "/api/devices/:id/command",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"action\": \"TURN_ON\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5500/api/devices/D001/command",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"devices",
+								"D001",
+								"command"
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. ACTION HISTORY API",
+			"item": [
+				{
+					"name": "/api/actions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5500/api/actions?page=1&limit=20",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"actions"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "20"
+								}
+							]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. PROFILE API",
+			"item": [
+				{
+					"name": "/api/profile",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5500/api/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"profile"
+							]
+						}
+					}
+				},
+				{
+					"name": "PUT /api/profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fullName\": \"Hoàng Trần\",\n  \"email\": \"hoang.tran@example.com\",\n  \"phone\": \"+84 912 345 678\",\n  \"dateOfBirth\": \"2000-01-15\",\n  \"address\": \"Hà Nội, Việt Nam\",\n  \"socialLinks\": {\n    \"github\": \"https://github.com/hoangtran\"\n  }\n}"
+						},
+						"url": {
+							"raw": "http://localhost:5500/api/profile",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5500",
+							"path": [
+								"api",
+								"profile"
+							]
+						}
+					}
+				}
+			]
+		}
+	]
+}

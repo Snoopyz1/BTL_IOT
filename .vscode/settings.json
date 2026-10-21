@@ -1,0 +1,4 @@
+{
+    "C_Cpp.default.compileCommands": "${workspaceFolder}/Phan_cung/compile_commands.json",
+    "C_Cpp.intelliSenseEngine": "default"
+}

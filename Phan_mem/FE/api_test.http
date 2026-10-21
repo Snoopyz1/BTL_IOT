@@ -1,0 +1,131 @@
+### Smart Home IoT Dashboard - File Test API Cơ Bản
+### Sử dụng với VS Code Extension "REST Client", Postman, Insomnia hoặc cURL
+
+@baseUrl = http://localhost:5500/api
+@authToken = mock_jwt_token_U001
+
+###############################################################################
+# 1. AUTH API (Xác thực người dùng)
+###############################################################################
+
+### 1.1 Đăng nhập (Login)
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "usernameOrEmail": "user123",
+  "password": "password123"
+}
+
+### 1.2 Đăng ký tài khoản (Register)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Hoàng Trần",
+  "username": "hoangtran",
+  "email": "hoang.tran@example.com",
+  "password": "password123",
+  "confirmPassword": "password123",
+  "phone": "+84 912 345 678"
+}
+
+### 1.3 Lấy thông tin tài khoản hiện tại (Me)
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{authToken}}
+
+
+###############################################################################
+# 2. SENSORS API (Cảm biến)
+###############################################################################
+
+### 2.1 Lấy danh sách cảm biến
+GET {{baseUrl}}/sensors
+
+### 2.2 Lấy chi tiết cảm biến theo ID
+GET {{baseUrl}}/sensors/S001
+
+### 2.3 Lấy dữ liệu lịch sử cảm biến (Phân trang)
+GET {{baseUrl}}/sensor-data?page=1&limit=20
+
+### 2.4 Lọc dữ liệu cảm biến theo ID cảm biến
+GET {{baseUrl}}/sensor-data?sensorId=S001&page=1&limit=10
+
+### 2.5 Lọc dữ liệu cảm biến theo loại (temperature / humidity / light)
+GET {{baseUrl}}/sensor-data?sensorType=temperature&page=1&limit=10
+
+### 2.6 Lọc dữ liệu cảm biến theo chuỗi thời gian (time query: yyyy, yyyy/MM, yyyy/MM/dd, yyyy/MM/dd HH:mm:ss)
+GET {{baseUrl}}/sensor-data?time=2026/08/19&page=1&limit=20
+
+### 2.7 Lọc dữ liệu cảm biến theo khoảng thời gian (from / to)
+GET {{baseUrl}}/sensor-data?from=2026-08-01&to=2026-08-19&page=1&limit=20
+
+
+###############################################################################
+# 3. DEVICES API (Thiết bị)
+###############################################################################
+
+### 3.1 Lấy danh sách thiết bị
+GET {{baseUrl}}/devices
+
+### 3.2 Lấy chi tiết thiết bị theo ID
+GET {{baseUrl}}/devices/D001
+
+### 3.3 Điều khiển BẬT thiết bị (TURN_ON)
+POST {{baseUrl}}/devices/D001/command
+Content-Type: application/json
+
+{
+  "action": "TURN_ON"
+}
+
+### 3.4 Điều khiển TẮT thiết bị (TURN_OFF)
+POST {{baseUrl}}/devices/D001/command
+Content-Type: application/json
+
+{
+  "action": "TURN_OFF"
+}
+
+
+###############################################################################
+# 4. ACTION HISTORY API (Lịch sử thao tác)
+###############################################################################
+
+### 4.1 Lấy danh sách lịch sử thao tác
+GET {{baseUrl}}/actions?page=1&limit=20
+
+### 4.2 Lọc lịch sử thao tác theo ID thiết bị
+GET {{baseUrl}}/actions?deviceId=D001&page=1&limit=10
+
+### 4.3 Lọc lịch sử thao tác theo trạng thái (SUCCESS / FAILED / PENDING / TIMEOUT)
+GET {{baseUrl}}/actions?status=SUCCESS&page=1&limit=10
+
+### 4.4 Lọc lịch sử thao tác theo chuỗi thời gian (time query)
+GET {{baseUrl}}/actions?time=2026/08&page=1&limit=10
+
+### 4.5 Lọc lịch sử thao tác tổng hợp
+GET {{baseUrl}}/actions?deviceId=D001&action=TURN_ON&status=SUCCESS&time=2026/08
+
+
+###############################################################################
+# 5. PROFILE API (Thông tin cá nhân)
+###############################################################################
+
+### 5.1 Lấy thông tin cá nhân
+GET {{baseUrl}}/profile
+
+### 5.2 Cập nhật thông tin cá nhân
+PUT {{baseUrl}}/profile
+Content-Type: application/json
+
+{
+  "fullName": "Hoàng Trần",
+  "email": "hoang.tran@example.com",
+  "phone": "+84 912 345 678",
+  "dateOfBirth": "2000-01-15",
+  "address": "Hà Nội, Việt Nam",
+  "socialLinks": {
+    "github": "https://github.com/usera"
+  }
+}

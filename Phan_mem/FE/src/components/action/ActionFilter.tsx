@@ -99,7 +99,7 @@ export default function ActionFilter({ onFilter, onReset }: ActionFilterProps) {
             value={filter.time}
             onChange={(e) => setFilter({ ...filter, time: e.target.value })}
             onKeyDown={handleKeyDown}
-            placeholder=""
+            placeholder="Nhập thời gian (VD: 2026-10-28, 22:00)..."
             className="h-9 px-3 rounded-lg border border-surface-200 bg-white text-sm text-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent w-full"
           />
         </div>

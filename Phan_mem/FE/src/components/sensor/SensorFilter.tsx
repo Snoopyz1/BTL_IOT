@@ -22,6 +22,12 @@ export default function SensorFilter({ onFilter, onReset }: SensorFilterProps) {
     getSensors().then(setSensors);
   }, []);
 
+  const selectedSensor = sensors.find((s) => s.id === filter.filterType);
+
+  const handleFilterTypeChange = (newType: string) => {
+    setFilter((prev) => ({ ...prev, filterType: newType, searchValue: '' }));
+  };
+
   const handleSearch = useCallback(() => {
     onFilter(filter);
   }, [filter, onFilter]);
@@ -39,8 +45,27 @@ export default function SensorFilter({ onFilter, onReset }: SensorFilterProps) {
 
   const getInputLabel = () => {
     if (filter.filterType === 'time') return 'Thời gian';
-    if (filter.filterType !== '') return 'Giá trị cảm biến';
+    if (selectedSensor) return `Giá trị ${selectedSensor.name.toLowerCase()} (${selectedSensor.unit})`;
     return 'Giá trị / Thời gian';
+  };
+
+  const getPlaceholder = () => {
+    if (filter.filterType === 'time') {
+      return 'Nhập thời gian (VD: 2026-10-28, 22:00:00)...';
+    }
+    if (selectedSensor) {
+      if (selectedSensor.type === 'temperature') {
+        return 'Nhập giá trị nhiệt độ (VD: 30, >25, <35)...';
+      }
+      if (selectedSensor.type === 'humidity') {
+        return 'Nhập giá trị độ ẩm (VD: 60, >50, <80)...';
+      }
+      if (selectedSensor.type === 'light') {
+        return 'Nhập giá trị ánh sáng lux (VD: 150, >100)...';
+      }
+      return `Nhập giá trị ${selectedSensor.name.toLowerCase()} (${selectedSensor.unit})...`;
+    }
+    return 'Nhập giá trị hoặc thời gian cần tìm...';
   };
 
   return (
@@ -51,7 +76,7 @@ export default function SensorFilter({ onFilter, onReset }: SensorFilterProps) {
           <label className="text-xs font-medium text-surface-500">Bộ lọc</label>
           <select
             value={filter.filterType}
-            onChange={(e) => setFilter({ ...filter, filterType: e.target.value })}
+            onChange={(e) => handleFilterTypeChange(e.target.value)}
             className="h-9 px-3 rounded-lg border border-surface-200 bg-white text-sm text-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent min-w-[160px] cursor-pointer"
           >
             <option value="">Tất cả</option>
@@ -70,7 +95,7 @@ export default function SensorFilter({ onFilter, onReset }: SensorFilterProps) {
             value={filter.searchValue}
             onChange={(e) => setFilter({ ...filter, searchValue: e.target.value })}
             onKeyDown={handleKeyDown}
-            placeholder=""
+            placeholder={getPlaceholder()}
             className="h-9 px-3 rounded-lg border border-surface-200 bg-white text-sm text-surface-700 focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent w-full"
           />
         </div>

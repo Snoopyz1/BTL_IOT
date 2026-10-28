@@ -1,6 +1,25 @@
 const pool = require('../config/database');
 
 function formatAction(row) {
+  const isPending = row.status === 'PENDING';
+  const isFailed = row.status === 'FAILED' || row.status === 'TIMEOUT';
+
+  let responseTime = undefined;
+  let responseDuration = null;
+
+  if (row.action_time) {
+    if (isPending) {
+      responseTime = undefined;
+      responseDuration = null;
+    } else if (isFailed) {
+      responseTime = new Date(new Date(row.action_time).getTime() + 5000).toISOString();
+      responseDuration = 5000;
+    } else {
+      responseTime = new Date(new Date(row.action_time).getTime() + 150).toISOString();
+      responseDuration = 150;
+    }
+  }
+
   return {
     id: `A${String(row.action_id).padStart(3, '0')}`,
     deviceId: `D${String(row.device_id).padStart(3, '0')}`,
@@ -8,10 +27,8 @@ function formatAction(row) {
     action: row.action,
     status: row.status || 'SUCCESS',
     actionTime: row.action_time ? new Date(row.action_time).toISOString() : '',
-    responseTime: row.action_time
-      ? new Date(new Date(row.action_time).getTime() + 150).toISOString()
-      : undefined,
-    responseDuration: 150,
+    responseTime,
+    responseDuration,
     createdBy: row.username || 'system',
   };
 }

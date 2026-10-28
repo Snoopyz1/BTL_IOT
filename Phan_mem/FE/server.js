@@ -26,9 +26,9 @@ let mockUser = {
   updatedAt: '2026-08-19T07:00:00+07:00',
   socialLinks: {
     github: 'https://github.com/Snoopyz1/BTL_IOT',
-    figma: 'https://figma.com/@usera',
+    figma: 'https://www.figma.com/design/0WHOIQyaYOzSWg0rPAGxry/Untitled?node-id=0-1&p=f&t=AYUzNeA7Z72IGcbX-0',
     linkedin: 'https://linkedin.com/in/usera',
-    postman: 'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de',
+    postman: 'https://documenter.getpostman.com/view/57489199/2sBYArTXx5#cd04e23e-d55d-4f23-a76f-d7d9b6eb9d24',
   },
 };
 
@@ -256,7 +256,7 @@ router.post('/auth/register', (req, res) => {
     updatedAt: new Date().toISOString(),
     socialLinks: {
       github: 'https://github.com/Snoopyz1/BTL_IOT',
-      postman: 'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de',
+      postman: 'https://documenter.getpostman.com/view/57489199/2sBYArTXx5#cd04e23e-d55d-4f23-a76f-d7d9b6eb9d24',
     },
   };
 
@@ -399,27 +399,33 @@ router.post('/devices/:id/command', (req, res) => {
     return res.status(400).json({ success: false, message: 'Lệnh không hợp lệ. Sử dụng TURN_ON hoặc TURN_OFF' });
   }
 
-  device.status = action === 'TURN_ON' ? 'ON' : 'OFF';
-  device.updatedAt = new Date().toISOString();
-
-  // Add to action history
-  mockActions.unshift({
+  // Thêm bản ghi PENDING vào lịch sử
+  const actionRecord = {
     id: `A${String(mockActions.length + 1).padStart(3, '0')}`,
     deviceId: device.id,
     deviceName: device.name,
     action,
-    status: 'SUCCESS',
+    status: 'PENDING',
     actionTime: new Date().toISOString(),
-    responseTime: new Date().toISOString(),
-    responseDuration: 120,
+    responseTime: undefined,
+    responseDuration: null,
     createdBy: 'user123',
-  });
+  };
+  mockActions.unshift(actionRecord);
 
-  res.json({
-    success: true,
-    message: `Đã ${action === 'TURN_ON' ? 'bật' : 'tắt'} ${device.name} thành công!`,
-    device,
-  });
+  // Giả lập không có thiết bị thật cắm vào: chờ 5s rồi thất bại
+  setTimeout(() => {
+    actionRecord.status = 'FAILED';
+    actionRecord.responseTime = new Date().toISOString();
+    actionRecord.responseDuration = 5000;
+
+    res.json({
+      success: false,
+      message: 'Không nhận được phản hồi từ thiết bị phần cứng. Thao tác thất bại!',
+      device,
+      responseTime: 5000,
+    });
+  }, 5000);
 });
 
 // ─── 3. ACTION HISTORY API ────────────────────────────────

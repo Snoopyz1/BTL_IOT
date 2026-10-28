@@ -8,13 +8,14 @@ function parseBit(val) {
 }
 
 function formatDevice(row) {
+  const esp32Connected = mqttHandler.getEsp32Status().connected;
   return {
     id: `D${String(row.device_id).padStart(3, '0')}`,
     name: row.device_name,
     type: row.device_type,
     location: row.location || '',
     status: parseBit(row.status) ? 'ON' : 'OFF',
-    online: parseBit(row.online),
+    online: esp32Connected && parseBit(row.online),
     mqttKey: row.mqtt_key || null,
     createdAt: row.created_at ? new Date(row.created_at).toISOString() : '',
     updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : '',
@@ -65,37 +66,93 @@ exports.sendCommand = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Không tìm thấy thiết bị' });
     }
 
+    if (!mqttHandler.getEsp32Status().connected) {
+      return res.status(503).json({
+        success: false,
+        message: 'Không thể điều khiển: Bo mạch ESP32 đang mất kết nối!',
+      });
+    }
+
     const device = rows[0];
     const oldStatus = parseBit(device.status) ? 'ON' : 'OFF';
     const newStatus = action === 'TURN_ON' ? 'ON' : 'OFF';
+    const userId = req.userId || 1;
 
-    // Gửi lệnh MQTT xuống ESP32
+    // 1. Tạo bản ghi ActionHistory với trạng thái PENDING trước
+    const [actionInsert] = await pool.query(
+      'INSERT INTO ActionHistory (action, old_status, new_status, status, user_id, device_id) VALUES (?, ?, ?, ?, ?, ?)',
+      [action, oldStatus, newStatus, 'PENDING', userId, id]
+    );
+    const actionId = actionInsert.insertId;
+
+    // Broadcast WebSocket để trang lịch sử thao tác hiện ngay bản ghi PENDING
+    mqttHandler.broadcast('action_history', {
+      actionId,
+      deviceId: `D${String(id).padStart(3, '0')}`,
+      deviceName: device.device_name,
+      action,
+      status: 'PENDING',
+      actionTime: new Date().toISOString(),
+    });
+
+    const startTime = Date.now();
+
+    // 2. Gửi lệnh MQTT xuống ESP32
     if (device.mqtt_key) {
       mqttHandler.publishDeviceCommand(device.mqtt_key, newStatus);
     }
 
-    // Cập nhật trạng thái trong DB
-    await pool.query(
-      'UPDATE Devices SET status = ?, updated_at = NOW() WHERE device_id = ?',
-      [action === 'TURN_ON' ? 1 : 0, id]
-    );
+    // 3. Chờ phản hồi thực tế từ phần cứng (timeout 5 giây)
+    const resp = await mqttHandler.waitForDeviceResponse(device.mqtt_key, newStatus, 5000);
+    const duration = Date.now() - startTime;
 
-    // Ghi lịch sử điều khiển
-    const userId = req.userId || 1;
-    await pool.query(
-      'INSERT INTO ActionHistory (action, old_status, new_status, user_id, device_id) VALUES (?, ?, ?, ?, ?)',
-      [action, oldStatus, newStatus, userId, id]
-    );
+    if (resp.success) {
+      // Phần cứng thật đã phản hồi thành công!
+      await pool.query(
+        'UPDATE Devices SET status = ?, online = 1, updated_at = NOW() WHERE device_id = ?',
+        [action === 'TURN_ON' ? 1 : 0, id]
+      );
 
-    // Lấy thiết bị sau khi cập nhật
-    const [updatedRows] = await pool.query('SELECT * FROM Devices WHERE device_id = ?', [id]);
+      await pool.query(
+        'UPDATE ActionHistory SET status = ? WHERE action_id = ?',
+        ['SUCCESS', actionId]
+      );
 
-    res.json({
-      success: true,
-      message: `Đã ${action === 'TURN_ON' ? 'bật' : 'tắt'} ${device.device_name} thành công!`,
-      device: formatDevice(updatedRows[0]),
-      responseTime: 150,
-    });
+      mqttHandler.broadcast('action_history', {
+        actionId,
+        deviceId: `D${String(id).padStart(3, '0')}`,
+        status: 'SUCCESS',
+      });
+
+      const [updatedRows] = await pool.query('SELECT * FROM Devices WHERE device_id = ?', [id]);
+
+      return res.json({
+        success: true,
+        message: `Đã ${action === 'TURN_ON' ? 'bật' : 'tắt'} ${device.device_name} thành công!`,
+        device: formatDevice(updatedRows[0]),
+        responseTime: duration,
+      });
+    } else {
+      // Không có thiết bị thật phản hồi -> Thất bại
+      await pool.query(
+        'UPDATE ActionHistory SET status = ? WHERE action_id = ?',
+        ['FAILED', actionId]
+      );
+
+      mqttHandler.broadcast('action_history', {
+        actionId,
+        deviceId: `D${String(id).padStart(3, '0')}`,
+        status: 'FAILED',
+      });
+
+      // Trạng thái thiết bị trong DB giữ nguyên (không đổi)
+      return res.json({
+        success: false,
+        message: `Thiết bị không phản hồi sau ${Math.round(duration / 1000)}s. Thao tác thất bại!`,
+        device: formatDevice(device),
+        responseTime: duration,
+      });
+    }
   } catch (error) {
     console.error('Send device command error:', error);
     res.status(500).json({ success: false, message: 'Lỗi server!' });

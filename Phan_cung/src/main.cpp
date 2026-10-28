@@ -252,7 +252,7 @@ void loop() {
   }
   client.loop();
 
-  if (millis() - lastRead >= 3000) {
+  if (millis() - lastRead >= 1500) {
     lastRead = millis();
 
     sensors_event_t humidity, temp;
@@ -266,26 +266,41 @@ void loop() {
     float humid = ahtOk ? humidity.relative_humidity : NAN;
     float lux = lightMeter.readLightLevel();
 
-    if (!isnan(tempC) && !isnan(humid) && !isnan(lux) && lux >= 0 && lux < 50000) {
-      Serial.printf("[Sensor] Temp: %.1f *C | Hum: %.1f %% | Lux: %.1f lx\n",
-                    tempC, humid, lux);
+    // Tự động khởi tạo lại BH1750 nếu bị lỏng dây, mất cấu hình hoặc reset về Power Down (lux <= 0 hoặc >= 50000)
+    if (lux <= 0.0 || lux >= 50000.0) {
+      lightMeter.begin(BH1750::CONTINUOUS_HIGH_RES_MODE);
+      lux = lightMeter.readLightLevel();
+    }
 
-      // Gửi dữ liệu lên topic Sensor
-      JsonDocument doc;
+    JsonDocument doc;
+    bool hasTempHum = !isnan(tempC) && !isnan(humid);
+    bool hasLux = !isnan(lux) && lux >= 0 && lux < 50000;
+
+    if (hasTempHum) {
       doc["temperature"] = round(tempC * 10.0) / 10.0;
       doc["humidity"] = round(humid * 10.0) / 10.0;
+    }
+
+    if (hasLux) {
       doc["light"] = round(lux * 10.0) / 10.0;
+    }
 
-      char sensorBuffer[128];
-      serializeJson(doc, sensorBuffer, sizeof(sensorBuffer));
-      client.publish(topic_sensor, sensorBuffer);
-
-      // Kiểm tra và điều khiển LED tự động theo cảm biến
-      checkAndControlSensors(tempC, humid, lux);
+    if (hasTempHum || hasLux) {
+      Serial.printf("[Sensor] Temp: %.1f *C | Hum: %.1f %% | Lux: %.1f lx\n",
+                    hasTempHum ? tempC : NAN,
+                    hasTempHum ? humid : NAN,
+                    hasLux ? lux : NAN);
+      checkAndControlSensors(hasTempHum ? tempC : NAN, hasTempHum ? humid : NAN, hasLux ? lux : -1.0);
     } else {
+      doc["status"] = "SENSOR_ERROR";
       Serial.printf("[Sensor] Loi doc du lieu cam bien! Kiem tra day noi I2C "
                     "(SDA=%d, SCL=%d)\n",
                     SDA_PIN, SCL_PIN);
     }
+
+    // Luon gui ban tin len topic_sensor de duy tri Heartbeat voi Server
+    char sensorBuffer[128];
+    serializeJson(doc, sensorBuffer, sizeof(sensorBuffer));
+    client.publish(topic_sensor, sensorBuffer);
   }
 }

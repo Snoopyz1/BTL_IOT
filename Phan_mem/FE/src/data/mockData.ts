@@ -117,8 +117,8 @@ export const mockUser: User = {
   updatedAt: '2026-08-19T07:00:00+07:00',
   socialLinks: {
     github: 'https://github.com/Snoopyz1/BTL_IOT',
-    figma: 'https://figma.com',
-    postman: 'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de',
+    figma: 'https://www.figma.com/design/0WHOIQyaYOzSWg0rPAGxry/Untitled?node-id=0-1&p=f&t=AYUzNeA7Z72IGcbX-0',
+    postman: 'https://documenter.getpostman.com/view/57489199/2sBYArTXx5#cd04e23e-d55d-4f23-a76f-d7d9b6eb9d24',
     pdfDocument: '/SmartHome_API_Docs.pdf',
     pdfFileName: 'SmartHome_API_Docs.pdf',
   },

@@ -3,6 +3,7 @@ import ActionFilter, { type ActionFilterState } from '../components/action/Actio
 import ActionTable from '../components/action/ActionTable.tsx';
 import SensorPagination from '../components/sensor/SensorPagination.tsx';
 import { getActions } from '../services/actionService.ts';
+import { mqttService } from '../services/mqttService.ts';
 import type { ActionHistory as ActionHistoryType, ActionQuery } from '../types/action.ts';
 
 export default function ActionHistory() {
@@ -43,7 +44,26 @@ export default function ActionHistory() {
 
   useEffect(() => {
     fetchData();
+
+    const unsub = mqttService.subscribe('smarthome/action/history', () => {
+      fetchData();
+    });
+
+    return () => {
+      unsub();
+    };
   }, [fetchData]);
+
+  // Tự động poll nếu có bản ghi PENDING đang chờ phản hồi
+  useEffect(() => {
+    const hasPending = data.some((item) => item.status === 'PENDING');
+    if (hasPending) {
+      const timer = setInterval(() => {
+        fetchData();
+      }, 1500);
+      return () => clearInterval(timer);
+    }
+  }, [data, fetchData]);
 
   const handleFilter = useCallback((newFilter: ActionFilterState) => {
     setFilter(newFilter);

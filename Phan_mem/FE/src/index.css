@@ -127,6 +127,11 @@ body {
 .toggle-switch.loading::after {
   animation: pulse-soft 0.8s ease-in-out infinite;
 }
+.toggle-switch.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
 
 /* ─── Status Badge ─────────────────────────────────────── */
 .status-badge {

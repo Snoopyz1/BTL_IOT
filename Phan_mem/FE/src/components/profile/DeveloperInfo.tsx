@@ -29,9 +29,16 @@ export default function DeveloperInfo({ socialLinks }: DeveloperInfoProps) {
       : 'https://github.com/Snoopyz1/BTL_IOT';
 
   const postmanUrl =
-    socialLinks?.postman && !socialLinks.postman.includes('smarthome-iot-api')
+    socialLinks?.postman &&
+    !socialLinks.postman.includes('smarthome-iot-api') &&
+    !socialLinks.postman.includes('hoang2005cc-3372547.postman.co')
       ? socialLinks.postman
-      : 'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de';
+      : 'https://documenter.getpostman.com/view/57489199/2sBYArTXx5#cd04e23e-d55d-4f23-a76f-d7d9b6eb9d24';
+
+  const figmaUrl =
+    socialLinks?.figma && !socialLinks.figma.includes('usera') && socialLinks.figma !== 'https://figma.com'
+      ? socialLinks.figma
+      : 'https://www.figma.com/design/0WHOIQyaYOzSWg0rPAGxry/Untitled?node-id=0-1&p=f&t=AYUzNeA7Z72IGcbX-0';
 
   const pdfUrl = socialLinks?.pdfDocument || '/SmartHome_API_Docs.pdf';
   const pdfName = socialLinks?.pdfFileName || 'SmartHome_API_Docs.pdf';
@@ -51,7 +58,7 @@ export default function DeveloperInfo({ socialLinks }: DeveloperInfoProps) {
     {
       key: 'figma',
       label: 'Figma',
-      url: socialLinks.figma || 'https://figma.com',
+      url: figmaUrl,
       icon: Link2,
       bgColor: 'bg-purple-600 text-white',
       borderColor: 'border-purple-200/80 hover:border-purple-400',

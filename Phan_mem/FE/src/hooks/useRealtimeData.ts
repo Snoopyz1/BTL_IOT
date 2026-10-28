@@ -269,8 +269,26 @@ export function useDevices() {
       }
     });
 
+    // Lắng nghe cập nhật trạng thái kết nối của ESP32 để đồng bộ online/offline cho các thiết bị
+    const unsubEsp = mqttService.subscribe('smarthome/esp32/status', (_topic, payload) => {
+      try {
+        const data = JSON.parse(payload);
+        if (typeof data?.connected === 'boolean') {
+          setDevices((prevDevices) =>
+            prevDevices.map((dev) => ({
+              ...dev,
+              online: data.connected,
+            }))
+          );
+        }
+      } catch (err) {
+        console.error('Failed to parse esp32 status in useDevices:', err);
+      }
+    });
+
     return () => {
       unsub();
+      unsubEsp();
     };
   }, []);
 

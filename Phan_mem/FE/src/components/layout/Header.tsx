@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Bell, Menu, Wifi, WifiOff, LogOut, User as UserIcon } from 'lucide-react';
-import { mqttService, type MqttConnectionStatus } from '../../services/mqttService.ts';
+import { mqttService } from '../../services/mqttService.ts';
 import { useAuth } from '../../context/AuthContext.tsx';
 import { useToast } from '../common/Toast.tsx';
 
@@ -23,14 +23,48 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const { showToast } = useToast();
 
   const page = pageTitles[location.pathname] || { title: 'SmartHome', breadcrumb: '' };
-  const [mqttStatus, setMqttStatus] = useState<MqttConnectionStatus>(mqttService.getStatus());
+  const [esp32Connected, setEsp32Connected] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  const hasInitializedRef = useRef(false);
+
   useEffect(() => {
-    const unsubscribe = mqttService.onStatusChange(setMqttStatus);
-    return unsubscribe;
-  }, []);
+    // 1. Lấy trạng thái ESP32 ban đầu qua API
+    fetch('/api/esp32/status')
+      .then((res) => res.json())
+      .then((data) => {
+        if (typeof data?.connected === 'boolean') {
+          setEsp32Connected(data.connected);
+          hasInitializedRef.current = true;
+        }
+      })
+      .catch(() => {});
+
+    // 2. Lắng nghe cập nhật trạng thái ESP32 realtime qua WebSocket
+    const unsub = mqttService.subscribe('smarthome/esp32/status', (_topic, payload) => {
+      try {
+        const data = JSON.parse(payload);
+        if (typeof data?.connected === 'boolean') {
+          setEsp32Connected((prev) => {
+            if (hasInitializedRef.current && prev !== data.connected) {
+              if (!data.connected) {
+                showToast('Mất kết nối với thiết bị (ESP32)!', 'error');
+              } else {
+                showToast('Đã kết nối lại với thiết bị ESP32!', 'success');
+              }
+            }
+            hasInitializedRef.current = true;
+            return data.connected;
+          });
+        }
+      } catch (err) {
+        console.error('Failed to parse esp32 status:', err);
+      }
+    });
+
+    return () => unsub();
+  }, [showToast]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -49,7 +83,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
     navigate('/login', { replace: true });
   };
 
-  const isConnected = mqttStatus === 'connected';
   const initial = user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U';
 
   return (
@@ -72,19 +105,22 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </div>
       </div>
 
-      {/* Right: MQTT status, Notifications, Avatar & Dropdown */}
+      {/* Right: ESP32 status, Notifications, Avatar & Dropdown */}
       <div className="flex items-center gap-3">
-        {/* MQTT Status */}
-        <div className={`
-          flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium
-          ${isConnected
-            ? 'bg-primary-50 text-primary-700'
-            : 'bg-red-50 text-red-600'
-          }
-        `}>
-          {isConnected ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
-          <span className="hidden sm:inline">{isConnected ? 'Đã kết nối MQTT' : 'Đã ngắt kết nối'}</span>
-          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-primary-500 animate-pulse-soft' : 'bg-red-400'}`} />
+        {/* ESP32 Connection Status */}
+        <div
+          title={esp32Connected ? 'Bo mạch ESP32 đang kết nối và truyền dữ liệu' : 'ESP32 đang mất kết nối hoặc chưa cắm điện'}
+          className={`
+            flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-300
+            ${esp32Connected
+              ? 'bg-primary-50 text-primary-700 border border-primary-200/60'
+              : 'bg-red-50 text-red-600 border border-red-200/60'
+            }
+          `}
+        >
+          {esp32Connected ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
+          <span>{esp32Connected ? 'ESP32 Đã kết nối' : 'ESP32 Mất kết nối'}</span>
+          <div className={`w-2 h-2 rounded-full ${esp32Connected ? 'bg-primary-500 animate-pulse-soft' : 'bg-red-500'}`} />
         </div>
 
         {/* Notification Bell */}

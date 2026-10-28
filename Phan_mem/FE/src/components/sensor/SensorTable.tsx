@@ -2,6 +2,7 @@ import type { SensorData } from '../../types/sensor.ts';
 import { EmptyState } from '../common/Loading.tsx';
 import { Database } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateUtils.ts';
+import CopyTimeCell from '../common/CopyTimeCell.tsx';
 
 interface SensorTableProps {
   data: SensorData[];
@@ -70,7 +71,9 @@ export default function SensorTable({ data, loading }: SensorTableProps) {
                 </td>
                 <td className="font-semibold text-surface-800">{row.value}</td>
                 <td className="text-surface-500">{row.unit}</td>
-                <td className="text-surface-500 text-xs font-mono">{formatDateTime(row.recordedAt)}</td>
+                <td className="text-surface-500 text-xs font-mono">
+                  <CopyTimeCell value={formatDateTime(row.recordedAt)} />
+                </td>
               </tr>
             ))}
           </tbody>

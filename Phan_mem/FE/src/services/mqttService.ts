@@ -143,6 +143,14 @@ class MqttService {
     if (message.type === 'device_status') {
       this.publishToHandlers('smarthome/device/status', JSON.stringify(message.data));
     }
+
+    if (message.type === 'action_history') {
+      this.publishToHandlers('smarthome/action/history', JSON.stringify(message.data));
+    }
+
+    if (message.type === 'esp32_status') {
+      this.publishToHandlers('smarthome/esp32/status', JSON.stringify(message.data));
+    }
   }
 
   /** Phát message tới tất cả handler đã subscribe topic */

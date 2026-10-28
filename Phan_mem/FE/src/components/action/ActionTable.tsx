@@ -2,6 +2,7 @@ import type { ActionHistory } from '../../types/action.ts';
 import { EmptyState } from '../common/Loading.tsx';
 import { History } from 'lucide-react';
 import { formatDateTime } from '../../utils/dateUtils.ts';
+import CopyTimeCell from '../common/CopyTimeCell.tsx';
 
 interface ActionTableProps {
   data: ActionHistory[];
@@ -80,9 +81,15 @@ export default function ActionTable({ data, loading }: ActionTableProps) {
                     {statusConfig[row.status]?.label || row.status}
                   </span>
                 </td>
-                <td className="text-xs text-surface-500 font-mono">{formatDateTime(row.actionTime)}</td>
                 <td className="text-xs text-surface-500 font-mono">
-                  {row.responseTime ? formatDateTime(row.responseTime) : '—'}
+                  <CopyTimeCell value={formatDateTime(row.actionTime)} />
+                </td>
+                <td className="text-xs text-surface-500 font-mono">
+                  {row.responseTime ? (
+                    <CopyTimeCell value={formatDateTime(row.responseTime)} />
+                  ) : (
+                    '—'
+                  )}
                 </td>
                 <td className="text-xs font-mono text-surface-600">
                   {row.responseDuration != null ? `${row.responseDuration}ms` : '—'}

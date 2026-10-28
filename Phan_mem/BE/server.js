@@ -48,6 +48,14 @@ async function start() {
     const sensorController = require('./controllers/sensorController');
     app.get('/api/sensor-data', sensorController.getSensorData);
 
+    // ── Bước 6: Khởi tạo MQTT Handler ──
+    const mqttHandler = require('./services/mqttHandler');
+
+    // ESP32 Connection Status API
+    app.get('/api/esp32/status', (req, res) => {
+      res.json(mqttHandler.getEsp32Status());
+    });
+
     // Health check
     app.get('/api/health', (req, res) => {
       res.json({ status: 'ok', timestamp: new Date().toISOString() });
@@ -59,6 +67,13 @@ async function start() {
 
     wss.on('connection', (ws) => {
       console.log(`[WS] Client kết nối. Tổng: ${wss.clients.size}`);
+
+      // Gửi trạng thái ESP32 hiện tại cho client ngay khi vừa kết nối
+      ws.send(JSON.stringify({
+        type: 'esp32_status',
+        data: mqttHandler.getEsp32Status(),
+      }));
+
       ws.on('close', () => {
         console.log(`[WS] Client ngắt kết nối. Tổng: ${wss.clients.size}`);
       });
@@ -67,8 +82,6 @@ async function start() {
       });
     });
 
-    // ── Bước 6: Khởi tạo MQTT Handler ──
-    const mqttHandler = require('./services/mqttHandler');
     mqttHandler.init(wss, pool);
 
 
@@ -206,8 +219,8 @@ async function initializeDatabase(pool) {
         'Administrator',
         JSON.stringify({
           github: 'https://github.com/Snoopyz1/BTL_IOT',
-          figma: 'https://figma.com/@usera',
-          postman: 'https://hoang2005cc-3372547.postman.co/workspace/5b8f1684-4063-45f7-82c7-0028ee682c3a/documentation/57489199-fd2ce726-1f9e-4507-bd6d-8758f08ce6de',
+          figma: 'https://www.figma.com/design/0WHOIQyaYOzSWg0rPAGxry/Untitled?node-id=0-1&p=f&t=AYUzNeA7Z72IGcbX-0',
+          postman: 'https://documenter.getpostman.com/view/57489199/2sBYArTXx5#cd04e23e-d55d-4f23-a76f-d7d9b6eb9d24',
         }),
       ]
     );
